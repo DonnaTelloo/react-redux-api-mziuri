@@ -1,25 +1,61 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from 'react';
+import {
+  useDispatch,
+  useSelector
+} from 'react-redux'
+import { getPosts, getPhotos, searchPosts } from './redux/actions';
+import PostsComponent from './components/posts'
+import PhotosComponent from './components/photos'
+const App = () => {
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const dispatch = useDispatch();
+
+  const {
+    Posts,
+    Photos
+  } = useSelector(state => state);
+
+  useEffect(() => {
+    dispatch(getPosts())
+    dispatch(getPhotos())
+  }, [])
+
+  useEffect(() => {
+    console.log(Posts)
+    console.log(Photos)
+  },[Posts, Photos])
+
+  const searchHandler = (keyword, key) => {
+    if(key == "Enter" && keyword !== ""){
+      dispatch(searchPosts(keyword))
+    }else if(keyword == ""){
+      dispatch(getPosts())
+    }
+  }
+
+  return(
+    <React.Fragment>
+      <input type="text" onKeyPress={(event) => searchHandler(event.target.value, event.key)}/>
+      { Posts.length > 0 && (
+        Posts.map(item => {
+          return(
+            <PostsComponent
+              key={item.id}
+              title={item.title}
+              desc={item.body}
+            />
+          )
+        })
+      ) }
+      {
+        Photos.length > 0 && (
+          Photos.map(item => {
+            return <PhotosComponent url={item.url} />
+          })
+        )
+      }
+    </React.Fragment>
+  )
 }
 
 export default App;
